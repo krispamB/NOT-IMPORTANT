@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model lunches {
+  id                               Int            @id @default(autoincrement())
+  org_id                           Int?
+  sender_id                        Int?
+  receiver_id                      Int?
+  quantity                         Int
+  redeemed                         Boolean?       @default(false)
+  note                             String?        @db.Text
+  created_at                       DateTime?      @default(now()) @db.Timestamp(0)
+  updated_at                       DateTime?      @default(now()) @db.Timestamp(0)
+  is_deleted                       Boolean?       @default(false)
+  organizations                    organizations? @relation(fields: [org_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "lunches_ibfk_1")
+  users_lunches_sender_idTousers   users?         @relation("lunches_sender_idTousers", fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "lunches_ibfk_2")
+  users_lunches_receiver_idTousers users?         @relation("lunches_receiver_idTousers", fields: [receiver_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "lunches_ibfk_3")
+
+  @@index([org_id], map: "org_id")
+  @@index([receiver_id], map: "receiver_id")
+  @@index([sender_id], map: "sender_id")
+}
+
+model organization_invites {
+  id            Int            @id @default(autoincrement())
+  email         String         @db.VarChar(255)
+  token         String         @db.VarChar(255)
+  ttl           DateTime       @db.DateTime(0)
+  org_id        Int?
+  created_at    DateTime?      @default(now()) @db.Timestamp(0)
+  updated_at    DateTime?      @default(now()) @db.Timestamp(0)
+  is_deleted    Boolean?       @default(false)
+  organizations organizations? @relation(fields: [org_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "organization_invites_ibfk_1")
+
+  @@index([org_id], map: "org_id")
+}
+
+model organization_lunch_wallets {
+  id            Int            @id @default(autoincrement())
+  balance       Decimal        @db.Decimal(10, 2)
+  org_id        Int?
+  created_at    DateTime?      @default(now()) @db.Timestamp(0)
+  updated_at    DateTime?      @default(now()) @db.Timestamp(0)
+  is_deleted    Boolean?       @default(false)
+  organizations organizations? @relation(fields: [org_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "organization_lunch_wallets_ibfk_1")
+
+  @@index([org_id], map: "org_id")
+}
+
+model organizations {
+  id                         Int                          @id @default(autoincrement())
+  name                       String                       @db.VarChar(255)
+  lunch_price                Decimal                      @db.Decimal(10, 2)
+  currency_code              String                       @db.VarChar(4)
+  created_at                 DateTime?                    @default(now()) @db.Timestamp(0)
+  updated_at                 DateTime?                    @default(now()) @db.Timestamp(0)
+  is_deleted                 Boolean?                     @default(false)
+  lunches                    lunches[]
+  organization_invites       organization_invites[]
+  organization_lunch_wallets organization_lunch_wallets[]
+  users                      users[]
+}
+
+model users {
+  id                                 Int            @id @default(autoincrement())
+  org_id                             Int?
+  first_name                         String?        @db.VarChar(255)
+  last_name                          String?        @db.VarChar(255)
+  profile_pic                        String?        @db.VarChar(255)
+  email                              String         @unique(map: "email") @db.VarChar(255)
+  phone                              String?        @db.VarChar(20)
+  password_hash                      String         @db.VarChar(255)
+  is_admin                           Boolean?
+  lunch_credit_balance               Int?
+  refresh_token                      String?        @db.VarChar(255)
+  bank_number                        String?        @db.VarChar(255)
+  bank_code                          String?        @db.VarChar(255)
+  bank_name                          String?        @db.VarChar(255)
+  bank_region                        String?        @db.VarChar(255)
+  currency                           String?        @db.VarChar(128)
+  currency_code                      String?        @db.VarChar(4)
+  created_at                         DateTime?      @default(now()) @db.Timestamp(0)
+  updated_at                         DateTime?      @default(now()) @db.Timestamp(0)
+  is_deleted                         Boolean?       @default(false)
+  lunches_lunches_sender_idTousers   lunches[]      @relation("lunches_sender_idTousers")
+  lunches_lunches_receiver_idTousers lunches[]      @relation("lunches_receiver_idTousers")
+  organizations                      organizations? @relation(fields: [org_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "users_ibfk_1")
+  withdrawals                        withdrawals[]
+
+  @@index([org_id], map: "org_id")
+}
+
+model withdrawals {
+  id         Int                @id @default(autoincrement())
+  user_id    Int?
+  status     withdrawals_status
+  amount     Decimal            @db.Decimal(10, 2)
+  created_at DateTime?          @default(now()) @db.Timestamp(0)
+  updated_at DateTime?          @default(now()) @db.Timestamp(0)
+  is_deleted Boolean?           @default(false)
+  users      users?             @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "withdrawals_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+enum withdrawals_status {
+  redeemed
+  not_redeemed
+}
