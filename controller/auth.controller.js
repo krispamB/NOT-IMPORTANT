@@ -30,6 +30,7 @@ const orgSignup = asyncHandler(async (req, res) => {
         first_name,
         last_name,
         phone: phone_number,
+        is_admin: true
       },
     })
 
