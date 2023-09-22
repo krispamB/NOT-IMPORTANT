@@ -65,6 +65,43 @@ const updateBankDetails = asyncHandler(async (req, res) => {
 })
 
 const getAllUsers = asyncHandler(async (req, res) => {
-  //logic here
+  const keywords = req.query.search ? req.query.search : ''
+
+  const candidates = await prisma.users.findMany({
+    where: {
+      org_id: req.user.org_id,
+      email: {
+        contains: keywords,
+      },
+    },
+    select: {
+      first_name: true,
+      last_name: true,
+      profile_pic: true,
+      email: true,
+      id: true,
+    },
+  })
+
+  res.status(200).json({
+    status: 200,
+    message: 'User list',
+    data: candidates,
+  })
 })
 export { getProfile, updateBankDetails, getAllUsers }
+
+/**
+ * const keyword = req.query.keyword
+    ? {
+        name: {
+          $regex: req.query.keyword,
+          $options: 'i',
+        },
+      }
+    : {}
+  const count = await Product.countDocuments({ ...keyword })
+  const products = await Product.find({ ...keyword })
+    .limit(pageSize)
+    .skip(pageSize * (page - 1))
+ */
