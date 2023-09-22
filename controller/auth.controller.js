@@ -66,6 +66,7 @@ const orgLogin = asyncHandler(async (req, res) => {
         email,
         id: user.id,
         isAdmin: user.is_admin,
+        available_lunch: user.lunch_credit_balance
       },
     })
   } else {

@@ -70,6 +70,7 @@ const staffSignUp = asyncHandler(async (req, res) => {
       last_name,
       phone: phone_number,
       org_id: invite.org_id,
+      lunch_credit_balance: 0
     },
   })
 

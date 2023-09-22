@@ -90,18 +90,3 @@ const getAllUsers = asyncHandler(async (req, res) => {
   })
 })
 export { getProfile, updateBankDetails, getAllUsers }
-
-/**
- * const keyword = req.query.keyword
-    ? {
-        name: {
-          $regex: req.query.keyword,
-          $options: 'i',
-        },
-      }
-    : {}
-  const count = await Product.countDocuments({ ...keyword })
-  const products = await Product.find({ ...keyword })
-    .limit(pageSize)
-    .skip(pageSize * (page - 1))
- */

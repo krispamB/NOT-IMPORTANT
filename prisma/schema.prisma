@@ -77,7 +77,7 @@ model users {
   phone                              String?        @db.VarChar(20)
   password_hash                      String         @db.VarChar(255)
   is_admin                           Boolean?       @default(false)
-  lunch_credit_balance               Int?
+  lunch_credit_balance               Int?       
   refresh_token                      String?        @db.VarChar(255)
   bank_number                        String?        @db.VarChar(255)
   bank_code                          String?        @db.VarChar(255)
