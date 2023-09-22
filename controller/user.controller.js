@@ -29,7 +29,39 @@ const getProfile = asyncHandler(async (req, res) => {
   }
 })
 const updateBankDetails = asyncHandler(async (req, res) => {
-  //logic here
+  const { bank_number, bank_code, bank_name, bank_region } = req.body
+  const updatedUser = await prisma.users.update({
+    where: {
+      id: req.user.id,
+    },
+    data: {
+      bank_name,
+      bank_number,
+      bank_code,
+      bank_region,
+    },
+  })
+
+  if (!updatedUser) {
+    res.status(400).json({
+      status: 400,
+      message: 'Bank details update failed',
+      data: null,
+    })
+  } else {
+    res.status(200).json({
+      status: 200,
+      message: 'Bank details update successful',
+      data: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        bank_name,
+        bank_number,
+        bank_code,
+        bank_region,
+      },
+    })
+  }
 })
 
 const getAllUsers = asyncHandler(async (req, res) => {

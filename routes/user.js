@@ -10,6 +10,6 @@ const router = Router()
 
 router.route('/').get(protect, getAllUsers)
 router.route('/profile').get(protect, getProfile)
-router.route('/bank').patch(updateBankDetails)
+router.route('/bank').patch(protect, updateBankDetails)
 
 export default router

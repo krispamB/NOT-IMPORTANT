@@ -16,7 +16,6 @@ const protect = asyncHandler(async(req, res, next) => {
 
 
       const decoded = jwt.verify(token, process.env.SECRET_KEY)
-      console.log(decoded)
 
       req.user = await prisma.users.findUnique({
         where: {
