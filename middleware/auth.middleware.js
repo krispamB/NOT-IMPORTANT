@@ -1,4 +1,4 @@
-import jwt, { decode } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import asyncHandler from 'express-async-handler'
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
@@ -12,10 +12,11 @@ const protect = asyncHandler(async(req, res, next) => {
   ){
     try {
       token = req.headers.authorization.split(' ')[1]
+    
 
 
       const decoded = jwt.verify(token, process.env.SECRET_KEY)
-   
+      console.log(decoded)
 
       req.user = await prisma.users.findUnique({
         where: {
@@ -27,20 +28,24 @@ const protect = asyncHandler(async(req, res, next) => {
           is_admin: true,
           lunch_credit_balance: true,
           org_id: true,
-        }    
+        }
       })
 
       next()
     } catch (error) {
       console.error(error)
-      res.status(401)
-      throw new Error('Not authorized token failed')
+      res.status(401).json({
+        status: 401,
+        message: 'There was an issue authorizing token',
+        data: null
+      })
     }
-
-    if (!token) {
-      res.status(401)
-      throw new Error('Not authorized, no token')
-    }
+  } else {
+    res.status(401).json({
+      status: 401,
+      message: 'Unauthorized',
+      data: null
+    })
   }
 })
 
