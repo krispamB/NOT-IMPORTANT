@@ -111,7 +111,9 @@ const invite = asyncHandler(async (req, res) => {
     res.status(201).json({
       message: 'Invite created successfully',
       statusCode: 200,
-      data: null,
+      data: {
+        otp_token: token
+      },
     })
   } else {
     res.status(400)

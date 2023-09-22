@@ -59,9 +59,47 @@ const sendLunch = asyncHandler(async (req, res) => {
   }
 })
 const getLunchById = asyncHandler(async (req, res) => {
-  //logic here
+  const lunch_id = Number(req.params.id)
+  console.log(lunch_id)
+  const lunch = await prisma.lunches.findUnique({
+    where: {
+      id: lunch_id
+    }
+  })
+  if(!lunch) {
+    res.status(404).json({
+      status: 404,
+      message: 'Lunch not found',
+      data: null
+    })
+  } else {
+    res.status(200).json({
+      status: 200,
+      message: `Lunch with id: ${lunch_id}`,
+      data: lunch
+    })
+  }
+  
 })
 const getUserLunches = asyncHandler(async (req, res) => {
-  //logic here
+  console.log(req.user.id)
+  const lunchesA = await prisma.lunches.findMany({
+    where: {
+      sender_id: req.user.id,
+    }
+  })
+  const lunchesB = await prisma.lunches.findMany({
+    where: {
+      receiver_id: req.user.id,
+    }
+  })
+  
+  const lunches = lunchesA.concat(...lunchesB)
+
+  res.status(200).json({
+    status: 200,
+    message: 'User lunches',
+    data: lunches
+  })
 })
 export { sendLunch, getLunchById, getUserLunches }
