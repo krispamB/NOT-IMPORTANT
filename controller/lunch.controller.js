@@ -18,6 +18,13 @@ const sendLunch = asyncHandler(async (req, res) => {
       id: receiver_id
     }
   })
+  if(!receiver) {
+    return res.status(404).json({
+      status: 400,
+      message: 'Receiver not found',
+      data: null
+    })
+  }
 
   if(req.user.org_id !== receiver.org_id) {
     return res.status(403).json({
