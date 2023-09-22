@@ -76,7 +76,7 @@ model users {
   email                              String         @unique(map: "email") @db.VarChar(255)
   phone                              String?        @db.VarChar(20)
   password_hash                      String         @db.VarChar(255)
-  is_admin                           Boolean?
+  is_admin                           Boolean?       @default(false)
   lunch_credit_balance               Int?
   refresh_token                      String?        @db.VarChar(255)
   bank_number                        String?        @db.VarChar(255)
