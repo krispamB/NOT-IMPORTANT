@@ -15,9 +15,7 @@ const app = express()
 // Cors
 app.use(cors({ origin: '*' }))
 
-
 app.use(express.json())
-
 // Routes
 app.use('/api', index)
 
