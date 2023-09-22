@@ -9,6 +9,6 @@ import { protect, admin } from '../middleware/auth.middleware.js'
 
 router.route('/create').post(protect, admin, createOrg)
 router.route('/staff/signup').post(staffSignUp)
-router.route('/invite').post(invite)
+router.route('/invite').post(protect, admin, invite)
 
 export default router
