@@ -70,8 +70,11 @@ const orgLogin = asyncHandler(async (req, res) => {
       },
     })
   } else {
-    res.status(401)
-    throw new Error('Invalid email or password')
+    res.status(401).json({
+      status: 401,
+      message: 'Invalid email or password',
+      data: null,
+    })
   }
 })
 

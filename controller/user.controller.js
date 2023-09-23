@@ -9,9 +9,22 @@ const getProfile = asyncHandler(async (req, res) => {
     },
   })
   if (!userProfile) {
-    res.status(404)
-    throw new Error('User profile not found')
+    return res.status(404).json({
+      status: 404,
+      message: 'User profile not found',
+      data: null,
+    })
   } else {
+    const lunchesA = await prisma.lunches.findMany({
+      where: {
+        sender_id: req.user.id,
+      }
+    })
+    const lunchesB = await prisma.lunches.findMany({
+      where: {
+        receiver_id: req.user.id,
+      }
+    })
     res.status(200).json({
       status: 200,
       message: 'Successful get request',
@@ -21,6 +34,8 @@ const getProfile = asyncHandler(async (req, res) => {
         profile_picture: userProfile.profile_pic,
         phone_number: userProfile.phone,
         bank_number: userProfile.bank_number,
+        lunch_sent: lunchesA.length,
+        lunch_received: lunchesB.length,
         bank_code: userProfile.bank_code,
         bank_name: userProfile.bank_name,
         isAdmin: userProfile.is_admin,

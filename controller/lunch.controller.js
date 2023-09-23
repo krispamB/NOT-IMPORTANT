@@ -3,7 +3,15 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 const sendLunch = asyncHandler(async (req, res) => {
-  const { receiver_id, quantity, note } = req.body
+  const receiver_id = Number(req.params.id)
+  const { quantity, note } = req.body
+  if(!receiver_id) {
+    return res.status(400).json({
+      status: 400,
+      message: 'ID must be provided in params',
+      data: null
+    })
+  }
 
   if(receiver_id === req.user.id) {
     return res.status(403).json({
@@ -36,6 +44,7 @@ const sendLunch = asyncHandler(async (req, res) => {
 
   const newLunch = await prisma.lunches.create({
     data: {
+      org_id: req.user.org_id,
       sender_id: req.user.id,
       receiver_id,
       quantity,

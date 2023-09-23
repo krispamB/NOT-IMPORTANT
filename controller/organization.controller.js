@@ -16,8 +16,11 @@ const createOrg = asyncHandler(async (req, res) => {
   })
 
   if (!newOrg) {
-    res.status(400)
-    throw new Error('An error occurred while creating organization')
+    return res.status(400).json({
+      status: 400,
+      message: 'An error occurred while creating organization',
+      data: null,
+    })
   }
 
   const updateUser = await prisma.users.update({
@@ -40,14 +43,31 @@ const createOrg = asyncHandler(async (req, res) => {
       },
     })
   } else {
-    res.status(404)
-    throw new Error('User not found')
+    res.status(404).json({
+      status: 404,
+      message: 'User not found',
+      data: null,
+    })
   }
 })
 
 const staffSignUp = asyncHandler(async (req, res) => {
   const { email, password, otp_token, first_name, last_name, phone_number } =
     req.body
+
+  const exists = await prisma.users.findUnique({
+    where: {
+      email,
+    },
+  })
+
+  if (exists) {
+    return res.status(400).json({
+      status: 400,
+      message: 'Credentials taken',
+      data: null,
+    })
+  }
 
   const invite = await prisma.organization_invites.findFirst({
     where: {
@@ -56,8 +76,11 @@ const staffSignUp = asyncHandler(async (req, res) => {
   })
 
   if (!invite) {
-    res.status(404)
-    throw new Error('Invite not found')
+    return res.status(404).json({
+      status: 404,
+      message: 'Invite not found',
+      data: null,
+    })
   }
 
   const password_hash = await argon.hash(password)
@@ -70,18 +93,17 @@ const staffSignUp = asyncHandler(async (req, res) => {
       last_name,
       phone: phone_number,
       org_id: invite.org_id,
-      lunch_credit_balance: 0
+      lunch_credit_balance: 0,
     },
   })
 
-  if (newStaff)
-    [
-      res.status(201).json({
-        status: 201,
-        message: 'User created successfully',
-        data: newStaff,
-      }),
-    ]
+  if (newStaff) {
+    res.status(201).json({
+      status: 201,
+      message: 'User created successfully',
+      data: newStaff,
+    })
+  }
 })
 
 //Admin
@@ -94,6 +116,7 @@ const invite = asyncHandler(async (req, res) => {
     return res.status(400).json({
       status: 400,
       message: 'Organization must be created before invites are sent',
+      data: null
     })
   }
 
@@ -112,12 +135,15 @@ const invite = asyncHandler(async (req, res) => {
       message: 'Invite created successfully',
       statusCode: 200,
       data: {
-        otp_token: token
+        otp_token: token,
       },
     })
   } else {
-    res.status(400)
-    throw new Error('An error occurred while sending invite')
+    res.status(400).json({
+      status: 400,
+      message: 'An error occurred while sending invite',
+      data: null
+    })
   }
 })
 export { createOrg, staffSignUp, invite }

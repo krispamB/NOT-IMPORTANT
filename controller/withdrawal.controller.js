@@ -3,9 +3,10 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 const withdrawRequest = asyncHandler(async (req, res) => {
-  const { amount, bank_code } = req.body
+  const { amount } = req.body
   const available = req.user.lunch_credit_balance
-  console.log(available)
+
+
   if (available < Number(amount)) {
     return res.status(400).json({
       status: 400,
@@ -14,13 +15,6 @@ const withdrawRequest = asyncHandler(async (req, res) => {
     })
   }
 
-  // if(bank_code != req.user.bank_code) {
-  //   return res.status(400).json({
-  //     status: 401,
-  //     message: `Incorrect bank code`,
-  //     data: null
-  //   })
-  // }
   const withdrawal = await prisma.withdrawals.create({
     data: {
       user_id: req.user.id,
