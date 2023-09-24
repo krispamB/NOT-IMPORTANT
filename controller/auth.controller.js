@@ -35,6 +35,7 @@ const orgSignup = asyncHandler(async (req, res) => {
       },
     })
 
+
     return res.status(201).json({
       status: 201,
       message: 'User created successfully',

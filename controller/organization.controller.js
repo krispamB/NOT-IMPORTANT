@@ -24,6 +24,13 @@ const createOrg = asyncHandler(async (req, res) => {
     })
   }
 
+  await prisma.organization_lunch_wallets.create({
+    data: {
+      org_id: newOrg.id,
+      balance: 10000,
+    },
+  })
+
   const updateUser = await prisma.users.update({
     where: {
       id: req.user.id,
@@ -117,7 +124,7 @@ const invite = asyncHandler(async (req, res) => {
     return res.status(400).json({
       status: 400,
       message: 'Organization must be created before invites are sent',
-      data: null
+      data: null,
     })
   }
 
@@ -143,8 +150,35 @@ const invite = asyncHandler(async (req, res) => {
     res.status(400).json({
       status: 400,
       message: 'An error occurred while sending invite',
-      data: null
+      data: null,
     })
   }
 })
-export { createOrg, staffSignUp, invite }
+
+const getWalletBalance = asyncHandler(async (req, res) => {
+  const org_id = req.user.org_id
+  const wallet = await prisma.organization_lunch_wallets.findFirst({
+    where: {
+      org_id,
+    },
+  })
+
+  if (!wallet) {
+    return res.status(404).json({
+      status: 404,
+      message: 'Wallet not found, create organization first',
+      data: null,
+    })
+  }
+
+  res.status(200).json({
+    status: 200,
+    message: 'Wallet balance',
+    data: {
+      id: wallet.id,
+      balance: wallet.balance,
+    },
+  })
+})
+
+export { createOrg, staffSignUp, invite, getWalletBalance }
