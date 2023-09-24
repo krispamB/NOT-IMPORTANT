@@ -104,4 +104,5 @@ const getAllUsers = asyncHandler(async (req, res) => {
     data: candidates,
   })
 })
+
 export { getProfile, updateBankDetails, getAllUsers }

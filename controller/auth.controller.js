@@ -2,7 +2,8 @@ import { PrismaClient } from '@prisma/client'
 import asyncHandler from 'express-async-handler'
 import * as argon from 'argon2'
 const prisma = new PrismaClient()
-import { generateToken } from '../utils/generateToken.js'
+import { generateOtpToken, generateToken } from '../utils/generateToken.js'
+import { resetPasswordMail, resetSuccessMail } from '../mails/mails.js'
 
 const orgSignup = asyncHandler(async (req, res) => {
   const { email, password, first_name, last_name, phone_number } = req.body
@@ -66,7 +67,7 @@ const orgLogin = asyncHandler(async (req, res) => {
         email,
         id: user.id,
         isAdmin: user.is_admin,
-        available_lunch: user.lunch_credit_balance
+        available_lunch: user.lunch_credit_balance,
       },
     })
   } else {
@@ -78,4 +79,70 @@ const orgLogin = asyncHandler(async (req, res) => {
   }
 })
 
-export { orgSignup, orgLogin }
+const resetRequest = asyncHandler(async (req, res) => {
+  const { email } = req.body
+  const token = generateOtpToken(6)
+
+  const user = await prisma.users.update({
+    where: {
+      email,
+    },
+    data: {
+      refresh_token: token,
+    },
+  })
+
+  if (!user) {
+    return res.status(404).json({
+      status: 404,
+      message: 'User not found',
+      data: null,
+    })
+  }
+
+  await resetPasswordMail(email, token, user.first_name)
+  res.status(200).json({
+    status: 200,
+    message: 'Mail sent successfully',
+    data: null,
+  })
+})
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const { new_password, otp_token } = req.body
+
+  const user = await prisma.users.findFirst({
+    where: {
+      refresh_token: otp_token,
+    },
+  })
+
+  if (!user) {
+    return res.status(404).json({
+      status: 404,
+      message: 'Token matches no users',
+      data: null,
+    })
+  }
+  const hash = await argon.hash(new_password)
+
+  const newUser = await prisma.users.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      password_hash: hash,
+      refresh_token: null,
+    },
+  })
+
+  await resetSuccessMail(newUser.email, newUser.first_name)
+
+  res.status(200).json({
+    status: 200,
+    message: 'Password updated successfully',
+    data: null,
+  })
+})
+
+export { orgSignup, orgLogin, resetRequest, resetPassword }

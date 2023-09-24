@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 import argon from 'argon2'
 import { generateOtpToken } from '../utils/generateToken.js'
+import { inviteMail } from '../mails/mails.js'
 
 const createOrg = asyncHandler(async (req, res) => {
   const { organization_name, lunch_price } = req.body
@@ -130,10 +131,10 @@ const invite = asyncHandler(async (req, res) => {
   })
 
   if (newInvite) {
-    // sendmail(token)
+    await inviteMail(email, token, req.user.email)
     res.status(201).json({
       message: 'Invite created successfully',
-      statusCode: 200,
+      statusCode: 201,
       data: {
         otp_token: token,
       },
